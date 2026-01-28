@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}予約一覧 - よやくん{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/completion.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="completion-container">
+    <h1 class="completion-title">予約一覧</h1>
+
+    <div class="card details-card">
+        <div class="card-header">
+            <h2>今後の予約</h2>
+        </div>
+        <div class="card-body">
+
+            {% if upcoming_reservations %}
+            {% for reservation in upcoming_reservations %}
+            <div class="detail-row" style="align-items:center;">
+                <div>
+                    <strong>#{{ reservation.id }}</strong><br>
+                    {{ reservation.date|date:"Y年m月d日" }} /
+                    {{ reservation.get_time_slot_display }}<br>
+                    <small>{{ reservation.name }}</small>
+                </div>
+
+                <div style="text-align:right;">
+                    <span class="status-badge status-confirmed">予約確定</span><br>
+                    <a href="{% url 'reservation_detail' reservation.pk %}" class="btn btn-secondary"
+                        style="margin-top:6px;">
+                        詳細
+                    </a>
+                </div>
+            </div>
+
+            {% if not forloop.last %}
+            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <p style="text-align:center;">今後の予約はありません</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="card details-card" style="margin-top:24px;">
+        <div class="card-header">
+            <h2>過去の予約</h2>
+        </div>
+        <div class="card-body">
+
+            {% if past_reservations %}
+            {% for reservation in past_reservations %}
+            <div class="detail-row" style="align-items:center; opacity:0.7;">
+                <div>
+                    <strong>#{{ reservation.id }}</strong><br>
+                    {{ reservation.date|date:"Y年m月d日" }} /
+                    {{ reservation.get_time_slot_display }}<br>
+                    <small>{{ reservation.name }}</small>
+                </div>
+
+                <div style="text-align:right;">
+                    {% if reservation.status == 'cancelled' %}
+                    <span class="status-badge" style="background:#E8DAEF;color:#5B2C6F;">
+                        キャンセル済み
+                    </span>
+                    {% else %}
+                    <span class="status-badge status-completed">完了</span>
+                    {% endif %}
+                    <br>
+                    <a href="{% url 'reservation_detail' reservation.pk %}" class="btn btn-secondary"
+                        style="margin-top:6px;">
+                        詳細
+                    </a>
+                </div>
+            </div>
+
+            {% if not forloop.last %}
+            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <p style="text-align:center;">過去の予約はありません</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'reserve' %}" class="btn btn-primary">
+            新しい予約を作成
+        </a>
+    </div>
+</div>
+{% endblock %}

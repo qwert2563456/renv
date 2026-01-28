@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}新規登録 - よやくん{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reservation.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 60px auto;">
+    <div class="card-header">
+        <h1>新規登録</h1>
+        <p style="color: var(--color-text-sub); margin-bottom: 0;">
+            アカウントを作成してください
+        </p>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-error">
+        {% for error in form.non_field_errors %}
+        {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" class="reservation-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">
+                {{ form.username.label }}
+            </label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <div class="form-error">
+                {% for error in form.username.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="form-help">
+                150文字以下。英数字と@/./+/-/_のみ使用可能です。
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">
+                {{ form.password1.label }}
+            </label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+            <div class="form-error">
+                {% for error in form.password1.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">
+                {{ form.password2.label }}
+            </label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+            <div class="form-error">
+                {% for error in form.password2.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+            登録
+        </button>
+    </form>
+
+    <div
+        style="text-align: center; margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--color-border);">
+        <p style="margin-bottom: var(--spacing-sm);">
+            すでにアカウントをお持ちの方は
+        </p>
+        <a href="{% url 'login' %}" class="btn btn-secondary btn-block">
+            ログイン
+        </a>
+    </div>
+</div>
+{% endblock %}
