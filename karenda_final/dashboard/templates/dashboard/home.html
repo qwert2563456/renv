@@ -1,0 +1,110 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}ダッシュボード{% endblock %}
+{% block page_title %}ダッシュボード{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h2>本日（{{ today|date:"Y年m月d日" }}）の予約</h2>
+        {% if today_reservations %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>時間帯</th>
+                        <th>お客様名</th>
+                        <th>メニュー</th>
+                        <th>ステータス</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in today_reservations %}
+                        <tr>
+                            <td>{{ res.get_time_slot_display }}</td>
+                            <td>{{ res.name }}</td>
+                            <td>
+                                {% if res.service_menu %}
+                                    {{ res.service_menu.name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ res.status }}">
+                                    {{ res.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboard:reservation_detail' res.pk %}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                    詳細
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #999; margin-top: 15px;">本日の予約はありません</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>今後の予約（確定分）</h2>
+        {% if upcoming_reservations %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>来店日</th>
+                        <th>時間帯</th>
+                        <th>お客様名</th>
+                        <th>メニュー</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in upcoming_reservations %}
+                        <tr>
+                            <td>{{ res.date|date:"m/d (D)" }}</td>
+                            <td>{{ res.get_time_slot_display }}</td>
+                            <td>{{ res.name }}</td>
+                            <td>
+                                {% if res.service_menu %}
+                                    {{ res.service_menu.name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboard:reservation_detail' res.pk %}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                    詳細
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #999; margin-top: 15px;">今後の予約がありません</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>ステータス別集計</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ステータス</th>
+                    <th>件数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in status_summary %}
+                    <tr>
+                        <td>{{ item.status|default:"不明" }}</td>
+                        <td>{{ item.count }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

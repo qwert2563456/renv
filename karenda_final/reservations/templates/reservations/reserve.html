@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}来店予約 - よやくん{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reservation.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .section-title {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--color-primary-light);
+        color: var(--color-primary);
+        font-size: 1.25rem;
+    }
+    .bike-info-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>来店予約</h1>
+        <p style="color: var(--color-text-sub); margin-bottom: 0;">
+            ご希望の日時と自転車の情報をご入力ください
+        </p>
+    </div>
+
+    {% if form.non_field_errors or bike_form.non_field_errors %}
+    <div class="alert alert-error">
+        <strong>入力内容にエラーがあります</strong>
+        <ul style="margin: var(--spacing-xs) 0 0 var(--spacing-md);">
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+            {% for error in bike_form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" id="reservationForm" class="reservation-form" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h2 class="section-title">1. 予約者情報・日時</h2>
+        
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+            <div class="date-input-wrapper">
+                {{ form.date }}
+                <span class="date-icon"></span>
+            </div>
+            {% if form.date.errors %}<div class="form-error">{{ form.date.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>{{ form.time_slot.label }}</label>
+            <div class="time-slot-group">
+                {% for value, label in form.time_slot.field.choices %}
+                <label class="time-slot-label">
+                    <input type="radio" name="{{ form.time_slot.name }}" value="{{ value }}"
+                        {% if form.time_slot.value == value %}checked{% endif %} class="time-slot-input">
+                    <span class="time-slot-text">{{ label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.time_slot.errors %}<div class="form-error">{{ form.time_slot.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.service_menu.id_for_label }}">{{ form.service_menu.label }}</label>
+            {{ form.service_menu }}
+            {% if form.service_menu.errors %}<div class="form-error">{{ form.service_menu.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>{{ form.visit_reason.label }}</label>
+            <div class="time-slot-group">
+                {% for value, label in form.visit_reason.field.choices %}
+                <label class="time-slot-label">
+                    <input type="radio" name="{{ form.visit_reason.name }}" value="{{ value }}"
+                        {% if form.visit_reason.value == value %}checked{% endif %} class="time-slot-input">
+                    <span class="time-slot-text">{{ label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.visit_reason.errors %}<div class="form-error">{{ form.visit_reason.errors.0 }}</div>{% endif %}
+        </div>
+
+        <h2 class="section-title">2. 自転車情報</h2>
+        <div class="bike-info-section">
+            <div class="form-group">
+                <label for="{{ bike_form.manufacturer.id_for_label }}">{{ bike_form.manufacturer.label }}</label>
+                {{ bike_form.manufacturer }}
+                {% if bike_form.manufacturer.errors %}<div class="form-error">{{ bike_form.manufacturer.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ bike_form.model_name.id_for_label }}">{{ bike_form.model_name.label }}</label>
+                {{ bike_form.model_name }}
+                {% if bike_form.model_name.errors %}<div class="form-error">{{ bike_form.model_name.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ bike_form.details.id_for_label }}">{{ bike_form.details.label }}</label>
+                {{ bike_form.details }}
+                {% if bike_form.details.errors %}<div class="form-error">{{ bike_form.details.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    {{ bike_form.has_parts_brought_in }}
+                    <span>{{ bike_form.has_parts_brought_in.label }}</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="images">不具合箇所の写真（複数可）</label>
+                <input type="file" name="images" id="images" multiple accept="image/*" class="form-control">
+                <div class="form-help">スマートフォンで撮影した写真をそのままアップロードできます</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+            {{ form.note }}
+            {% if form.note.errors %}<div class="form-error">{{ form.note.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">戻る</a>
+            <button type="submit" class="btn btn-primary btn-block" id="submitBtn">予約を確定する</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    const bookedSlots = {{ booked_slots| safe }};
+    const fp = flatpickr("#id_date", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: [
+            function (date) {
+                const d = date.toISOString().split("T")[0];
+                return bookedSlots[d]?.length === 2;
+            }
+        ],
+        onChange: function (selectedDates, dateStr) {
+            updateTimeSlots(dateStr);
+        }
+    });
+
+    function updateTimeSlots(dateStr) {
+        const booked = bookedSlots[dateStr] || [];
+        document.querySelectorAll('input[name="time_slot"]').forEach(input => {
+            input.disabled = booked.includes(input.value);
+            if (input.disabled && input.checked) {
+                input.checked = false;
+            }
+        });
+    }
+</script>
+{% endblock %}

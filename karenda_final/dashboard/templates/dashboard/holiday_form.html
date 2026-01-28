@@ -1,0 +1,50 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{% if is_edit %}休日編集{% else %}休日追加{% endif %}{% endblock %}
+{% block page_title %}{% if is_edit %}休日編集{% else %}休日追加{% endif %}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h2>{% if is_edit %}休日編集{% else %}新しい休日を追加{% endif %}</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="date">日付</label>
+                <input type="date" name="date" id="date" value="{{ holiday.date|date:'Y-m-d' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="name">名称</label>
+                <input type="text" name="name" id="name" value="{{ holiday.name }}" placeholder="例: 正月休業、臨時休業" required>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="is_permanent" {% if holiday.is_permanent %}checked{% endif %}>
+                    定休日（毎週同じ曜日の定休日）
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="day_of_week">曜日（定休日の場合）</label>
+                <select name="day_of_week" id="day_of_week">
+                    <option value="">選択してください</option>
+                    {% for value, label in day_of_week_choices %}
+                        <option value="{{ value }}" {% if holiday.day_of_week == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if is_edit %}更新{% else %}追加{% endif %}
+                </button>
+                <a href="{% url 'dashboard:holiday_list' %}" class="btn btn-secondary">キャンセル</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

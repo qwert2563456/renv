@@ -1,0 +1,82 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}作業履歴編集{% endblock %}
+{% block page_title %}作業履歴編集 - {{ reservation.name }}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h2>予約情報</h2>
+        <table>
+            <tr>
+                <th style="width: 150px;">予約番号</th>
+                <td>#{{ reservation.id }}</td>
+            </tr>
+            <tr>
+                <th>お客様名</th>
+                <td>{{ reservation.name }}</td>
+            </tr>
+            <tr>
+                <th>来店日</th>
+                <td>{{ reservation.date|date:"Y年m月d日 (D)" }}</td>
+            </tr>
+            <tr>
+                <th>メニュー</th>
+                <td>{{ reservation.service_menu.name }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>作業履歴・見積もり入力</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="status">ステータス</label>
+                <select name="status" id="status">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if work_history.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="estimated_amount">見積金額（円）</label>
+                <input type="number" name="estimated_amount" id="estimated_amount" 
+                       value="{{ work_history.estimated_amount|default:'' }}" min="0" step="100">
+            </div>
+
+            <div class="form-group">
+                <label for="actual_amount">確定金額（円）</label>
+                <input type="number" name="actual_amount" id="actual_amount" 
+                       value="{{ work_history.actual_amount|default:'' }}" min="0" step="100">
+            </div>
+
+            <div class="form-group">
+                <label for="admin_comment">作業内容・コメント</label>
+                <textarea name="admin_comment" id="admin_comment" placeholder="作業内容、注意事項、お客様へのメッセージなどを記入してください">{{ work_history.admin_comment }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="completion_photo">完了写真</label>
+                {% if work_history.completion_photo %}
+                    <div style="margin-bottom: 15px;">
+                        <img src="{{ work_history.completion_photo.url }}" alt="完了写真" style="max-width: 300px; border-radius: 4px;">
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            現在の写真
+                        </p>
+                    </div>
+                {% endif %}
+                <input type="file" name="completion_photo" id="completion_photo" accept="image/*">
+                <small style="color: #666;">JPG、PNG形式で最大5MBまで</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a href="{% url 'dashboard:reservation_detail' reservation.pk %}" class="btn btn-secondary">戻る</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

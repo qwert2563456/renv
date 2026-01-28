@@ -1,0 +1,68 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{% if is_edit %}メニュー編集{% else %}メニュー追加{% endif %}{% endblock %}
+{% block page_title %}{% if is_edit %}メニュー編集{% else %}メニュー追加{% endif %}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h2>{% if is_edit %}メニュー編集{% else %}新しいメニューを追加{% endif %}</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">メニュー名</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <small style="color: #e74c3c;">{{ form.name.errors }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.estimated_duration.id_for_label }}">想定作業時間（分）</label>
+                {{ form.estimated_duration }}
+                {% if form.estimated_duration.errors %}
+                    <small style="color: #e74c3c;">{{ form.estimated_duration.errors }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.base_price.id_for_label }}">基本料金（円）</label>
+                {{ form.base_price }}
+                {% if form.base_price.errors %}
+                    <small style="color: #e74c3c;">{{ form.base_price.errors }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.price_display.id_for_label }}">料金表示テキスト</label>
+                {{ form.price_display }}
+                <small style="color: #666;">例: 「5,000円～」「応相談」</small>
+                {% if form.price_display.errors %}
+                    <small style="color: #e74c3c;">{{ form.price_display.errors }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">説明</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <small style="color: #e74c3c;">{{ form.description.errors }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if is_edit %}更新{% else %}追加{% endif %}
+                </button>
+                <a href="{% url 'dashboard:service_menu_list' %}" class="btn btn-secondary">キャンセル</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

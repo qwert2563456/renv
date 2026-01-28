@@ -1,0 +1,58 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}休日設定{% endblock %}
+{% block page_title %}休日設定{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0;">休日一覧</h2>
+            <a href="{% url 'dashboard:holiday_add' %}" class="btn btn-primary">
+                + 新しい休日を追加
+            </a>
+        </div>
+
+        {% if holidays %}
+            <table style="margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>名称</th>
+                        <th>種類</th>
+                        <th>曜日</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for holiday in holidays %}
+                        <tr>
+                            <td>{{ holiday.date|date:"Y年m月d日" }}</td>
+                            <td>{{ holiday.name }}</td>
+                            <td>
+                                {% if holiday.is_permanent %}
+                                    <span class="status-badge" style="background-color: #cfe2ff; color: #084298;">定休日</span>
+                                {% else %}
+                                    <span class="status-badge" style="background-color: #fff3cd; color: #856404;">臨時休業</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if holiday.day_of_week is not None %}
+                                    {{ holiday.get_day_of_week_display }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboard:holiday_edit' holiday.pk %}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                    編集
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #999; margin-top: 15px;">休日がまだ登録されていません。</p>
+        {% endif %}
+    </div>
+{% endblock %}

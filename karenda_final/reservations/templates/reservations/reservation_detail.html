@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}予約詳細 - よやくん{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/completion.css' %}">
+<style>
+    .section-title {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--color-primary-light);
+        color: var(--color-primary);
+        font-size: 1.25rem;
+    }
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .image-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="completion-container">
+    <h1 class="completion-title">予約詳細</h1>
+
+    <div class="card details-card">
+        <div class="card-header">
+            <h2>ご予約内容</h2>
+        </div>
+        <div class="card-body">
+            <div class="detail-row">
+                <span class="detail-label">予約番号</span>
+                <span class="detail-value">#{{ reservation.id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">お名前</span>
+                <span class="detail-value">{{ reservation.name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">来店日</span>
+                <span class="detail-value">{{ reservation.date|date:"Y年m月d日" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">時間帯</span>
+                <span class="detail-value">{{ reservation.get_time_slot_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">メニュー</span>
+                <span class="detail-value">{{ reservation.service_menu.name|default:"未選択" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">ステータス</span>
+                <span class="detail-value">
+                    {% if reservation.status == 'confirmed' %}
+                    <span class="status-badge status-confirmed">予約確定</span>
+                    {% elif reservation.status == 'cancelled' %}
+                    <span class="status-badge" style="background-color: #E8DAEF; color: #5B2C6F;">キャンセル済み</span>
+                    {% else %}
+                    <span class="status-badge status-completed">{{ reservation.get_status_display }}</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if bike_info %}
+        <div class="card-header">
+            <h2 class="section-title">自転車情報</h2>
+        </div>
+        <div class="card-body">
+            <div class="detail-row">
+                <span class="detail-label">メーカー</span>
+                <span class="detail-value">{{ bike_info.manufacturer }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">モデル名</span>
+                <span class="detail-value">{{ bike_info.model_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">修理・整備詳細</span>
+                <span class="detail-value">{{ bike_info.details|linebreaks }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">パーツ持ち込み</span>
+                <span class="detail-value">{% if bike_info.has_parts_brought_in %}あり{% else %}なし{% endif %}</span>
+            </div>
+            
+            {% if bike_info.images.all %}
+            <div class="detail-row" style="display: block;">
+                <span class="detail-label">アップロード写真</span>
+                <div class="image-grid">
+                    {% for img in bike_info.images.all %}
+                    <div class="image-item">
+                        <a href="{{ img.image.url }}" target="_blank">
+                            <img src="{{ img.image.url }}" alt="自転車写真">
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if reservation.note %}
+        <div class="card-header">
+            <h2 class="section-title">備考</h2>
+        </div>
+        <div class="card-body">
+            <div class="detail-row">
+                <span class="detail-value">{{ reservation.note|linebreaks }}</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="action-buttons">
+        {% if reservation.status == 'confirmed' %}
+        <a href="{% url 'cancel_reservation' reservation.pk %}" class="btn btn-danger">予約をキャンセル</a>
+        {% endif %}
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">戻る</a>
+    </div>
+</div>
+{% endblock %}

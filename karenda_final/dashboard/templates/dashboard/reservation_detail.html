@@ -1,0 +1,163 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}予約詳細{% endblock %}
+{% block page_title %}予約詳細 - {{ reservation.name }}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h2>予約情報</h2>
+        <table>
+            <tr>
+                <th style="width: 150px;">予約番号</th>
+                <td>#{{ reservation.id }}</td>
+            </tr>
+            <tr>
+                <th>お客様名</th>
+                <td>{{ reservation.name }}</td>
+            </tr>
+            <tr>
+                <th>メールアドレス</th>
+                <td>{{ reservation.email }}</td>
+            </tr>
+            <tr>
+                <th>電話番号</th>
+                <td>{{ reservation.phone }}</td>
+            </tr>
+            <tr>
+                <th>来店日</th>
+                <td>{{ reservation.date|date:"Y年m月d日 (D)" }}</td>
+            </tr>
+            <tr>
+                <th>時間帯</th>
+                <td>{{ reservation.get_time_slot_display }}</td>
+            </tr>
+            <tr>
+                <th>メニュー</th>
+                <td>
+                    {% if reservation.service_menu %}
+                        {{ reservation.service_menu.name }}
+                        <br><small style="color: #666;">
+                            想定時間: {{ reservation.service_menu.estimated_duration }}分 / 
+                            料金目安: {{ reservation.service_menu.price_display }}
+                        </small>
+                    {% else %}
+                        未選択
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>ステータス</th>
+                <td>
+                    <span class="status-badge status-{{ reservation.status }}">
+                        {{ reservation.get_status_display }}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>作成日時</th>
+                <td>{{ reservation.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    {% if bike_info %}
+        <div class="card">
+            <h2>自転車情報</h2>
+            <table>
+                <tr>
+                    <th style="width: 150px;">メーカー</th>
+                    <td>{{ bike_info.manufacturer }}</td>
+                </tr>
+                <tr>
+                    <th>モデル名</th>
+                    <td>{{ bike_info.model_name }}</td>
+                </tr>
+                <tr>
+                    <th>修理・整備内容</th>
+                    <td>{{ bike_info.repair_details }}</td>
+                </tr>
+                <tr>
+                    <th>パーツ持ち込み</th>
+                    <td>{% if bike_info.parts_included %}あり{% else %}なし{% endif %}</td>
+                </tr>
+                <tr>
+                    <th>パーツ詳細</th>
+                    <td>{{ bike_info.parts_details|default:"記載なし" }}</td>
+                </tr>
+            </table>
+
+            {% if bike_info.images.all %}
+                <h3 style="margin-top: 20px;">不具合箇所の写真</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    {% for image in bike_info.images.all %}
+                        <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+                            <img src="{{ image.image.url }}" alt="自転車画像" style="width: 100%; height: 200px; object-fit: cover;">
+                            <p style="padding: 10px; font-size: 12px; color: #666; margin: 0;">
+                                {{ image.uploaded_at|date:"Y-m-d H:i" }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if work_history %}
+        <div class="card">
+            <h2>作業履歴・見積もり</h2>
+            <table>
+                <tr>
+                    <th style="width: 150px;">ステータス</th>
+                    <td>
+                        <span class="status-badge status-{{ work_history.status }}">
+                            {{ work_history.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>見積金額</th>
+                    <td>{% if work_history.estimated_amount %}{{ work_history.estimated_amount }}円{% else %}未設定{% endif %}</td>
+                </tr>
+                <tr>
+                    <th>確定金額</th>
+                    <td>{% if work_history.actual_amount %}{{ work_history.actual_amount }}円{% else %}未設定{% endif %}</td>
+                </tr>
+                <tr>
+                    <th>管理者コメント</th>
+                    <td>{{ work_history.admin_comment|linebreaks|default:"記載なし" }}</td>
+                </tr>
+            </table>
+
+            {% if work_history.completion_photo %}
+                <h3 style="margin-top: 20px;">完了写真</h3>
+                <div style="margin-top: 15px;">
+                    <img src="{{ work_history.completion_photo.url }}" alt="完了写真" style="max-width: 400px; border-radius: 4px;">
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>ステータス更新</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="status">ステータス</label>
+                <select name="status" id="status">
+                    {% for value, label in form.status.field.choices %}
+                        <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">更新</button>
+                <a href="{% url 'dashboard:work_history_edit' reservation.pk %}" class="btn btn-secondary">
+                    作業履歴を編集
+                </a>
+                <a href="{% url 'dashboard:reservation_list' %}" class="btn btn-secondary">戻る</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

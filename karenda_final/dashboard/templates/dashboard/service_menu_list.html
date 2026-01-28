@@ -1,0 +1,46 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}メニュー設定{% endblock %}
+{% block page_title %}メニュー設定{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0;">メニュー一覧</h2>
+            <a href="{% url 'dashboard:service_menu_add' %}" class="btn btn-primary">
+                + 新しいメニューを追加
+            </a>
+        </div>
+
+        {% if menus %}
+            <table style="margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>メニュー名</th>
+                        <th>想定時間</th>
+                        <th>料金目安</th>
+                        <th>説明</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for menu in menus %}
+                        <tr>
+                            <td><strong>{{ menu.name }}</strong></td>
+                            <td>{{ menu.estimated_duration }}分</td>
+                            <td>{{ menu.price_display }}</td>
+                            <td>{{ menu.description|truncatewords:10 }}</td>
+                            <td>
+                                <a href="{% url 'dashboard:service_menu_edit' menu.pk %}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                    編集
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #999; margin-top: 15px;">メニューがまだ登録されていません。</p>
+        {% endif %}
+    </div>
+{% endblock %}
